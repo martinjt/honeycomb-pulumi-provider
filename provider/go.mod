@@ -1,8 +1,11 @@
 module github.com/martinjt/honeycomb-pulumi-provider/provider
 
-go 1.21
+go 1.20
 
-require github.com/pulumi/pulumi-go-provider v0.8.0
+require (
+	github.com/pulumi/pulumi-go-provider v0.8.0
+	github.com/pulumi/pulumi/sdk/v3 v3.40.1-0.20220919114821-ae098e405919
+)
 
 require (
 	github.com/Microsoft/go-winio v0.5.2 // indirect
@@ -22,6 +25,7 @@ require (
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/glog v1.0.0 // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
@@ -41,7 +45,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/term v1.1.0 // indirect
 	github.com/pulumi/pulumi/pkg/v3 v3.40.1-0.20220919114821-ae098e405919 // indirect
-	github.com/pulumi/pulumi/sdk/v3 v3.40.1-0.20220919114821-ae098e405919 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect

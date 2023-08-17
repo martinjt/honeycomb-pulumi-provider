@@ -7,7 +7,7 @@ on:
 env:
   PROVIDER: "pulumi-honeycomb"
   # THIS GITHUB_TOKEN IS A REQUIREMENT TO BE ABLE TO WRITE TO GH RELEASES
-  GITHUB_TOKEN: ${{ YOUR GITHUB TOKEN HERE }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   # IF YOU NEED TO PUBLISH A NPM PACKAGE THEN ENSURE A NPM_TOKEN SECRET IS SET
   # AND PUBLISH_NPM: TRUE. IF YOU WANT TO PUBLISH TO A PRIVATE NPM REGISTRY
   # THEN ENSURE THE NPM_REGISTRY_URL IS CHANGED
@@ -30,7 +30,11 @@ env:
   PYPI_USERNAME: "YOUR PYPI USERNAME HERE"
   PYPI_REPOSITORY_URL: ""
   PUBLISH_PYPI: false
+  PUBLISH_NUGET_GITHUB: true
 jobs:
+  permissions:
+    packages: write
+    contents: read
   publish_binary:
     name: publish
     runs-on: ubuntu-latest
@@ -124,6 +128,12 @@ jobs:
         name: publish nuget package
         run: |
           dotnet nuget push ${{github.workspace}}/sdk/dotnet/bin/Debug/*.nupkg -s ${{ env.NUGET_FEED_URL }} -k ${{ env.NUGET_PUBLISH_KEY }}
+          echo "done publishing packages"
+      - if: ${{ matrix.language == 'dotnet' && env.PUBLISH_GITHUB_NUGET == 'true' }}
+        name: publish nuget package
+        run: |
+          dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/martinjt/index.json"
+          dotnet nuget push ${{github.workspace}}/sdk/dotnet/bin/Debug/*.nupkg -s "https://nuget.pkg.github.com/martinjt/index.json" -k ${{ secrets.GITHUB_TOKEN }}
           echo "done publishing packages"
     strategy:
       fail-fast: true
