@@ -1,27 +1,33 @@
-PROJECT_NAME := Pulumi Xyz Resource Provider
+PROJECT_NAME := Pulumi Honeycomb Resource Provider
 
-PACK             := xyz
+PACK             := honeycomb
 PACKDIR          := sdk
-PROJECT          := github.com/pulumi/pulumi-xyz
-NODE_MODULE_NAME := @pulumi/xyz
-NUGET_PKG_NAME   := Pulumi.Xyz
+PROJECT          := ../../honeycomb-pulumi-provider
+NODE_MODULE_NAME := @pulumi/honeycomb
+NUGET_PKG_NAME   := Pulumi.Honeycomb
 
 PROVIDER        := pulumi-resource-${PACK}
 VERSION         ?= $(shell pulumictl get version)
 PROVIDER_PATH   := provider
-VERSION_PATH     := ${PROVIDER_PATH}/cmd/main.Version
+VERSION_PATH    := ${PROVIDER_PATH}/cmd/main.Version
+SCHEMA_PATH     := ${PROVIDER_PATH}/cmd/${PROVIDER}/schema.json
 
 GOPATH			:= $(shell go env GOPATH)
 
 WORKING_DIR     := $(shell pwd)
 TESTPARALLELISM := 4
 
+gen_schema:
+	pulumi package get-schema $(WORKING_DIR)/bin/${PROVIDER} > $(SCHEMA_PATH)
+
 ensure::
 	cd provider && go mod tidy
 	cd sdk && go mod tidy
 	cd tests && go mod tidy
 
-provider::
+provider: build_provider ## gen_schema
+
+build_provider::
 	(cd provider && go build -o $(WORKING_DIR)/bin/${PROVIDER} -ldflags "-X ${PROJECT}/${VERSION_PATH}=${VERSION}" $(PROJECT)/${PROVIDER_PATH}/cmd/$(PROVIDER))
 
 provider_debug::

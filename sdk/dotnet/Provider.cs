@@ -7,11 +7,15 @@ using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Pulumi.Serialization;
 
-namespace Pulumi.Xyz
+namespace Pulumi.Honeycomb
 {
-    [XyzResourceType("pulumi:providers:xyz")]
+    [HoneycombResourceType("pulumi:providers:honeycomb")]
     public partial class Provider : global::Pulumi.ProviderResource
     {
+        [Output("apikey")]
+        public Output<string> Apikey { get; private set; } = null!;
+
+
         /// <summary>
         /// Create a Provider resource with the given unique name, arguments, and options.
         /// </summary>
@@ -19,8 +23,8 @@ namespace Pulumi.Xyz
         /// <param name="name">The unique name of the resource</param>
         /// <param name="args">The arguments used to populate this resource's properties</param>
         /// <param name="options">A bag of options that control this resource's behavior</param>
-        public Provider(string name, ProviderArgs? args = null, CustomResourceOptions? options = null)
-            : base("xyz", name, args ?? new ProviderArgs(), MakeResourceOptions(options, ""))
+        public Provider(string name, ProviderArgs args, CustomResourceOptions? options = null)
+            : base("honeycomb", name, args ?? new ProviderArgs(), MakeResourceOptions(options, ""))
         {
         }
 
@@ -39,6 +43,9 @@ namespace Pulumi.Xyz
 
     public sealed class ProviderArgs : global::Pulumi.ResourceArgs
     {
+        [Input("apikey", required: true)]
+        public Input<string> Apikey { get; set; } = null!;
+
         public ProviderArgs()
         {
         }

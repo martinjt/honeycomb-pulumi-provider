@@ -15,25 +15,35 @@
 package main
 
 import (
-	"math/rand"
-	"time"
-
+	"bytes"
+	"encoding/json"
 	p "github.com/pulumi/pulumi-go-provider"
 	"github.com/pulumi/pulumi-go-provider/infer"
+	"io"
+	"net/http"
+	"time"
 )
 
 // Version is initialized by the Go linker to contain the semver of this build.
 var Version string
 
 func main() {
-	p.RunProvider("xyz", Version,
+	err := p.RunProvider("honeycomb", Version,
 		// We tell the provider what resources it needs to support.
 		// In this case, a single custom resource.
 		infer.Provider(infer.Options{
 			Resources: []infer.InferredResource{
-				infer.Resource[Random, RandomArgs, RandomState](),
+				infer.Resource[Dataset, DatasetArgs, DatasetState](),
 			},
+			Config: infer.Config[*Config](),
 		}))
+	if err != nil {
+		return
+	}
+}
+
+type Config struct {
+	ApiKey string `pulumi:"apikey"`
 }
 
 // Each resource has a controlling struct.
@@ -46,41 +56,72 @@ func main() {
 // - Delete: Custom logic when the resource is deleted.
 // - Annotate: Describe fields and set defaults for a resource.
 // - WireDependencies: Control how outputs and secrets flows through values.
-type Random struct{}
+type Dataset struct{}
 
 // Each resource has in input struct, defining what arguments it accepts.
-type RandomArgs struct {
+type DatasetArgs struct {
 	// Fields projected into Pulumi must be public and hava a `pulumi:"..."` tag.
 	// The pulumi tag doesn't need to match the field name, but its generally a
 	// good idea.
-	Length int `pulumi:"length"`
+	Name            string `pulumi:"name"`
+	Description     string `pulumi:"description"`
+	ExpandJsonDepth int    `pulumi:"expand_json_depth"`
 }
 
 // Each resource has a state, describing the fields that exist on the created resource.
-type RandomState struct {
+type DatasetState struct {
 	// It is generally a good idea to embed args in outputs, but it isn't strictly necessary.
-	RandomArgs
+	DatasetArgs
 	// Here we define a required output called result.
-	Result string `pulumi:"result"`
+	Name            string `pulumi:"name"`
+	Description     string `pulumi:"description"`
+	ExpandJsonDepth int    `pulumi:"expand_json_depth"`
+	Slug            string `pulumi:"slug"`
+	CreatedAt       string `pulumi:"createdAd"`
+}
+
+type DatasetCreateRequest struct {
+	Name            string `json:"name"`
+	Description     string `json:"description"`
+	ExpandJsonDepth int    `json:"expand_json_depth"`
 }
 
 // All resources must implement Create at a minumum.
-func (Random) Create(ctx p.Context, name string, input RandomArgs, preview bool) (string, RandomState, error) {
-	state := RandomState{RandomArgs: input}
+func (Dataset) Create(ctx p.Context, name string, input DatasetArgs, preview bool) (string, DatasetState, error) {
+	config := infer.GetConfig[Config](ctx)
+	state := DatasetState{DatasetArgs: input}
 	if preview {
 		return name, state, nil
 	}
-	state.Result = makeRandom(input.Length)
+	makeDataset(input, config)
 	return name, state, nil
 }
 
-func makeRandom(length int) string {
-	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
-	charset := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+func makeDataset(args DatasetArgs, config Config) {
 
-	result := make([]rune, length)
-	for i := range result {
-		result[i] = charset[seededRand.Intn(len(charset))]
+	datasetRequest := DatasetCreateRequest{
+		Name:            args.Name,
+		Description:     args.Description,
+		ExpandJsonDepth: args.ExpandJsonDepth,
 	}
-	return string(result)
+
+	marshalledRequest, err := json.Marshal(datasetRequest)
+	req, err := http.NewRequest(
+		"http://api.honeycomb.io/v1/datasets",
+		"application/x-www-form-urlencoded",
+		bytes.NewReader(marshalledRequest))
+	req.Header.Set("X-Honeycomb-Team", config.ApiKey)
+
+	client := http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+
+	if err != nil {
+		// handle error
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+
+		}
+	}(resp.Body)
 }
