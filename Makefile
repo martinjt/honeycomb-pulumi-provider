@@ -17,9 +17,6 @@ GOPATH			:= $(shell go env GOPATH)
 WORKING_DIR     := $(shell pwd)
 TESTPARALLELISM := 4
 
-gen_schema:
-	pulumi package get-schema $(WORKING_DIR)/bin/${PROVIDER} > $(SCHEMA_PATH)
-
 ensure::
 	cd provider && go mod tidy
 	cd sdk && go mod tidy
