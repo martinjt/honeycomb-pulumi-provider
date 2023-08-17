@@ -2,7 +2,7 @@ PROJECT_NAME := Pulumi Honeycomb Resource Provider
 
 PACK             := honeycomb
 PACKDIR          := sdk
-PROJECT          := ../../honeycomb-pulumi-provider
+PROJECT          := github.com/martinjt/honeycomb-pulumi-provider
 NODE_MODULE_NAME := @pulumi/honeycomb
 NUGET_PKG_NAME   := Pulumi.Honeycomb
 
