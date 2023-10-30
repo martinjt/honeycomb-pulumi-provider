@@ -1,13 +1,14 @@
-package main
+package honeycombapi
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+
 	p "github.com/pulumi/pulumi-go-provider"
 	"github.com/pulumi/pulumi-go-provider/infer"
-	"io/ioutil"
-	"net/http"
 )
 
 type Dataset struct{}
@@ -64,7 +65,7 @@ func makeDataset(args DatasetArgs, config Config) {
 	}
 	fmt.Println("response Status:", response.Status)
 	fmt.Println("response Headers:", response.Header)
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	fmt.Println("response Body:", string(body))
 	defer response.Body.Close()
 }
