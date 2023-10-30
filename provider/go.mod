@@ -1,6 +1,6 @@
 module github.com/martinjt/honeycomb-pulumi-provider/provider
 
-go 1.20
+go 1.21
 
 require (
 	github.com/pulumi/pulumi-go-provider v0.8.0
