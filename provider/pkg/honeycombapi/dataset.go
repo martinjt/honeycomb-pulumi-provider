@@ -54,5 +54,5 @@ type DatasetCreateResponse struct {
 	Name            string `json:"name"`
 	Description     string `json:"description"`
 	ExpandJsonDepth int    `json:"expand_json_depth"`
-	Slug            string `pulumi:"slug"`
+	Slug            string `json:"slug"`
 }
