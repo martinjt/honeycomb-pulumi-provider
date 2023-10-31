@@ -7,13 +7,13 @@ using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Pulumi.Serialization;
 
-namespace Pulumi.Honeycomb.Honeycombapi
+namespace Pulumi.Honeycomb.Provider
 {
-    [HoneycombResourceType("honeycomb:honeycombapi:Dataset")]
+    [HoneycombResourceType("honeycomb:provider:Dataset")]
     public partial class Dataset : global::Pulumi.CustomResource
     {
-        [Output("createdAd")]
-        public Output<string> CreatedAd { get; private set; } = null!;
+        [Output("createdAt")]
+        public Output<string> CreatedAt { get; private set; } = null!;
 
         [Output("description")]
         public Output<string> Description { get; private set; } = null!;
@@ -36,12 +36,12 @@ namespace Pulumi.Honeycomb.Honeycombapi
         /// <param name="args">The arguments used to populate this resource's properties</param>
         /// <param name="options">A bag of options that control this resource's behavior</param>
         public Dataset(string name, DatasetArgs args, CustomResourceOptions? options = null)
-            : base("honeycomb:honeycombapi:Dataset", name, args ?? new DatasetArgs(), MakeResourceOptions(options, ""))
+            : base("honeycomb:provider:Dataset", name, args ?? new DatasetArgs(), MakeResourceOptions(options, ""))
         {
         }
 
         private Dataset(string name, Input<string> id, CustomResourceOptions? options = null)
-            : base("honeycomb:honeycombapi:Dataset", name, null, MakeResourceOptions(options, id))
+            : base("honeycomb:provider:Dataset", name, null, MakeResourceOptions(options, id))
         {
         }
 
@@ -74,6 +74,9 @@ namespace Pulumi.Honeycomb.Honeycombapi
     {
         [Input("description", required: true)]
         public Input<string> Description { get; set; } = null!;
+
+        [Input("expand_json_depth", required: true)]
+        public Input<int> Expand_json_depth { get; set; } = null!;
 
         [Input("name", required: true)]
         public Input<string> Name { get; set; } = null!;

@@ -8,28 +8,30 @@ import (
 	"net/http"
 )
 
-type Headers struct {
-	CONTENTTYPE string
-}
-
 const (
 	HEADER_CONTENT_TYPE = "Content-Type"
 	HONEYCOMB_API_KEY   = "X-Honeycomb-Team"
 )
 
-var httpClient http.Client
-var honeycombApiConfig HoneycombApiConfig
+type HoneycombApi struct {
+	HttpClient http.Client
+	Config     HoneycombApiConfig
+}
 
-func sendPostRequestToHoneycomb[A any](route string, body any) (A, ApiError) {
+func (api HoneycombApi) Setup(config HoneycombApiConfig) {
+
+}
+
+func SendPostRequest[A any](api *HoneycombApi, route string, body any) (A, ApiError) {
 	requestJsonBody, _ := json.Marshal(body)
 	req, _ := http.NewRequest("POST",
-		honeycombApiUrl(route),
+		api.routeUrl(route),
 		bytes.NewReader(requestJsonBody))
 
 	req.Header.Set(HONEYCOMB_API_KEY, "application/json; charset=UTF-8")
-	req.Header.Set(HEADER_CONTENT_TYPE, honeycombApiConfig.ApiKey)
+	req.Header.Set(HEADER_CONTENT_TYPE, api.Config.ApiKey)
 
-	response, _ := httpClient.Do(req)
+	response, _ := api.HttpClient.Do(req)
 	defer response.Body.Close()
 
 	parsedResponse, parseError := parseResponse[A](response)
@@ -37,8 +39,8 @@ func sendPostRequestToHoneycomb[A any](route string, body any) (A, ApiError) {
 	return parsedResponse, parseError
 }
 
-func honeycombApiUrl(route string) string {
-	const baseUrl = "https://api.honeycomb.io/1/%v"
+func (api *HoneycombApi) routeUrl(route string) string {
+	const baseUrl = "https://%v/1/%v"
 	return fmt.Sprintf(baseUrl, route)
 }
 

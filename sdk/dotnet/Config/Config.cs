@@ -39,5 +39,12 @@ namespace Pulumi.Honeycomb
             set => _apikey.Set(value);
         }
 
+        private static readonly __Value<string?> _domain = new __Value<string?>(() => __config.Get("domain"));
+        public static string? Domain
+        {
+            get => _domain.Get();
+            set => _domain.Set(value);
+        }
+
     }
 }
