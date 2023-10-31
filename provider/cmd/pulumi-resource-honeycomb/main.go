@@ -16,7 +16,7 @@ func main() {
 			ModuleMap: map[tokens.ModuleName]tokens.ModuleName{
 				"index": "Dataset",
 			},
-			Config: infer.Config[*honey.Config](),
+			Config: infer.Config[*honey.HoneycombApiConfig](),
 		}))
 	if err != nil {
 		return
