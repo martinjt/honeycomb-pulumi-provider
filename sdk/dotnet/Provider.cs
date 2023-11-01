@@ -16,7 +16,7 @@ namespace Pulumi.Honeycomb
         public Output<string> Apikey { get; private set; } = null!;
 
         [Output("domain")]
-        public Output<string> Domain { get; private set; } = null!;
+        public Output<string?> Domain { get; private set; } = null!;
 
 
         /// <summary>
@@ -49,8 +49,8 @@ namespace Pulumi.Honeycomb
         [Input("apikey", required: true)]
         public Input<string> Apikey { get; set; } = null!;
 
-        [Input("domain", required: true)]
-        public Input<string> Domain { get; set; } = null!;
+        [Input("domain")]
+        public Input<string>? Domain { get; set; }
 
         public ProviderArgs()
         {
