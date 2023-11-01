@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/honeycombio/terraform-provider-honeycombio v0.18.2
 	github.com/pulumi/pulumi-go-provider v0.13.0
-	github.com/pulumi/pulumi/sdk/v3 v3.91.1
+	github.com/pulumi/pulumi/sdk/v3 v3.91.1 // indirect
 )
 
 require (
