@@ -34,6 +34,10 @@ func (Dataset) Create(ctx p.Context, name string, input DatasetArgs, preview boo
 	return name, state, nil
 }
 
+func (Dataset) Annotate(a infer.Annotator) {
+	a.SetToken("Resources", "Dataset")
+}
+
 func makeDataset(ctx p.Context, apiClient *hnyclient.Client, args DatasetArgs, state DatasetState) {
 
 	datasetResponse, _ := apiClient.Datasets.Create(ctx, &hnyclient.Dataset{
