@@ -4,6 +4,7 @@ import (
 	p "github.com/pulumi/pulumi-go-provider"
 	"github.com/pulumi/pulumi-go-provider/infer"
 	"github.com/pulumi/pulumi-go-provider/middleware/schema"
+	"github.com/pulumi/pulumi/sdk/v3/go/common/tokens"
 )
 
 func NewProvider() p.Provider {
@@ -18,9 +19,13 @@ func NewProvider() p.Provider {
 				"kind/native",
 			},
 		},
-		Config: infer.Config[HoneycombProviderConfig](),
+		ModuleMap: map[tokens.ModuleName]tokens.ModuleName{
+			"provider": "Resources",
+		},
+		Config: infer.Config[*HoneycombProviderConfig](),
 		Resources: []infer.InferredResource{
-			infer.Resource[Dataset](),
+			infer.Resource[Dataset, DatasetInputs, DatasetState](),
+			infer.Resource[*Column, ColumnInputs, ColumnState](),
 		},
 	})
 }
