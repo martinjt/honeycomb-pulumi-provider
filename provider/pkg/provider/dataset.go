@@ -26,6 +26,8 @@ type DatasetState struct {
 
 func (Dataset) Create(ctx p.Context, name string, input DatasetArgs, preview bool) (string, DatasetState, error) {
 	honeycombProviderConfig := infer.GetConfig[HoneycombProviderConfig](ctx)
+	honeycombProviderConfig.Configure(ctx)
+
 	state := DatasetState{DatasetArgs: input}
 	if preview {
 		return name, state, nil

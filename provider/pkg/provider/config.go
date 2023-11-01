@@ -5,7 +5,6 @@ import (
 
 	hnyclient "github.com/honeycombio/terraform-provider-honeycombio/client"
 	p "github.com/pulumi/pulumi-go-provider"
-	"github.com/pulumi/pulumi/sdk/v3/go/common/diag"
 	"github.com/pulumi/pulumi/sdk/v3/go/common/resource"
 )
 
@@ -14,7 +13,8 @@ type HoneycombProviderConfig struct {
 
 	ApiKey string `pulumi:"apikey"`
 
-	Domain *string `pulumi:"domain,optional"`
+	Domain  *string `pulumi:"domain,optional"`
+	Version *string `pulumi:"version,optional"`
 }
 
 func (config *HoneycombProviderConfig) Configure(ctx p.Context) error {
@@ -26,7 +26,6 @@ func (config *HoneycombProviderConfig) Configure(ctx p.Context) error {
 	}
 	client, _ := hnyclient.NewClient(clientConfig)
 	config.Client = client
-	ctx.Log(diag.Error, "Running Config for HoneycombProvider")
 	return nil
 }
 

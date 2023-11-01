@@ -18,6 +18,9 @@ namespace Pulumi.Honeycomb
         [Output("domain")]
         public Output<string?> Domain { get; private set; } = null!;
 
+        [Output("version")]
+        public Output<string?> Version { get; private set; } = null!;
+
 
         /// <summary>
         /// Create a Provider resource with the given unique name, arguments, and options.
@@ -51,6 +54,9 @@ namespace Pulumi.Honeycomb
 
         [Input("domain")]
         public Input<string>? Domain { get; set; }
+
+        [Input("version")]
+        public Input<string>? Version { get; set; }
 
         public ProviderArgs()
         {
