@@ -7,6 +7,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sdk", "sdk", "{7FEBAB00-5DA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pulumi.Honeycomb", "sdk\dotnet\Pulumi.Honeycomb.csproj", "{BA6D2E29-1D35-4304-A097-999169392C84}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{2907127C-FD66-49D0-B52F-163FE516637A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet", "dotnet", "{A5B664D3-D239-4B69-A523-25C329A1F188}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "basic_dataset", "examples\dotnet\basic_dataset\basic_dataset.csproj", "{D524E98B-70B8-4F34-9213-F26013C8D5D4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,12 +23,18 @@ Global
 		{BA6D2E29-1D35-4304-A097-999169392C84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA6D2E29-1D35-4304-A097-999169392C84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA6D2E29-1D35-4304-A097-999169392C84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D524E98B-70B8-4F34-9213-F26013C8D5D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D524E98B-70B8-4F34-9213-F26013C8D5D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D524E98B-70B8-4F34-9213-F26013C8D5D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D524E98B-70B8-4F34-9213-F26013C8D5D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BA6D2E29-1D35-4304-A097-999169392C84} = {7FEBAB00-5DAD-44A5-9192-321108AD95F1}
+		{A5B664D3-D239-4B69-A523-25C329A1F188} = {2907127C-FD66-49D0-B52F-163FE516637A}
+		{D524E98B-70B8-4F34-9213-F26013C8D5D4} = {A5B664D3-D239-4B69-A523-25C329A1F188}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1343CCFA-DEE2-4B42-93DF-4C956B467365}
