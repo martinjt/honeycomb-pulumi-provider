@@ -53,6 +53,7 @@ namespace Pulumi.Honeycomb
         {
             var dst = src ?? new global::Pulumi.InvokeOptions{};
             dst.Version = src?.Version ?? Version;
+            dst.PluginDownloadURL = src?.PluginDownloadURL ?? "github://api.github.com/martinjt/honeycomb-pulumi-provider";
             return dst;
         }
 
