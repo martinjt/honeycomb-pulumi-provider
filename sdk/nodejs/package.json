@@ -1,9 +1,14 @@
 {
-    "name": "@pulumi/xyz",
+    "name": "@pulumi/honeycomb",
     "version": "${VERSION}",
+    "keywords": [
+        "honeycomb",
+        "observability",
+        "category/observability",
+        "kind/native"
+    ],
     "scripts": {
-        "build": "tsc",
-        "install": "node scripts/install-pulumi-plugin.js resource xyz ${VERSION}"
+        "build": "tsc"
     },
     "dependencies": {
         "@pulumi/pulumi": "^3.42.0"
@@ -14,6 +19,7 @@
     },
     "pulumi": {
         "resource": true,
-        "name": "xyz"
+        "name": "honeycomb",
+        "server": "github://api.github.com/martinjt/honeycomb-pulumi-provider"
     }
 }
