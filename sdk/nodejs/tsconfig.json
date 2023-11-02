@@ -13,9 +13,18 @@
         "strict": true
     },
     "files": [
+        "config/index.ts",
+        "config/vars.ts",
         "index.ts",
         "provider.ts",
-        "random.ts",
+        "resources/column.ts",
+        "resources/dataset.ts",
+        "resources/index.ts",
+        "types/enums/index.ts",
+        "types/enums/resources/index.ts",
+        "types/index.ts",
+        "types/input.ts",
+        "types/output.ts",
         "utilities.ts"
     ]
 }

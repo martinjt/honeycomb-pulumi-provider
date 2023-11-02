@@ -21,7 +21,7 @@ func NewProvider() p.Provider {
 			PluginDownloadURL: "github://api.github.com/martinjt/honeycomb-pulumi-provider",
 		},
 		ModuleMap: map[tokens.ModuleName]tokens.ModuleName{
-			"provider": "Resources",
+			"provider": "resources",
 		},
 		Config: infer.Config[*HoneycombProviderConfig](),
 		Resources: []infer.InferredResource{
