@@ -10,7 +10,8 @@ env:
   # THIS GITHUB_TOKEN IS A REQUIREMENT TO BE ABLE TO WRITE TO GH RELEASES
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   PUBLISH_NPM: false
-  PUBLISH_NUGET: true
+  PUBLISH_NUGET: false
+  PUBLISH_NUGET_GITHUB: true
   PUBLISH_PYPI: false
 jobs:
   publish_binary:
@@ -135,7 +136,7 @@ jobs:
           dotnet nuget push ${{github.workspace}}/sdk/dotnet/bin/Debug/*.nupkg -s ${{ env.NUGET_FEED_URL }} -k ${{ env.NUGET_PUBLISH_KEY }}
           echo "done publishing packages"
       - if: ${{ matrix.language == 'dotnet' && env.PUBLISH_GITHUB_NUGET == 'true' }}
-        name: publish nuget package
+        name: publish nuget package (Github)
         run: |
           dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/martinjt/index.json"
           dotnet nuget push ${{github.workspace}}/sdk/dotnet/bin/Debug/*.nupkg -s "https://nuget.pkg.github.com/martinjt/index.json" -k ${{ secrets.GITHUB_TOKEN }}
