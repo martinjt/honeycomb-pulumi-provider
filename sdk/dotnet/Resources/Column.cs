@@ -9,7 +9,7 @@ using Pulumi.Serialization;
 
 namespace Pulumi.Honeycomb.Resources
 {
-    [HoneycombResourceType("honeycomb:Resources:Column")]
+    [HoneycombResourceType("honeycomb:resources:Column")]
     public partial class Column : global::Pulumi.CustomResource
     {
         [Output("columnId")]
@@ -39,12 +39,12 @@ namespace Pulumi.Honeycomb.Resources
         /// <param name="args">The arguments used to populate this resource's properties</param>
         /// <param name="options">A bag of options that control this resource's behavior</param>
         public Column(string name, ColumnArgs args, CustomResourceOptions? options = null)
-            : base("honeycomb:Resources:Column", name, args ?? new ColumnArgs(), MakeResourceOptions(options, ""))
+            : base("honeycomb:resources:Column", name, args ?? new ColumnArgs(), MakeResourceOptions(options, ""))
         {
         }
 
         private Column(string name, Input<string> id, CustomResourceOptions? options = null)
-            : base("honeycomb:Resources:Column", name, null, MakeResourceOptions(options, id))
+            : base("honeycomb:resources:Column", name, null, MakeResourceOptions(options, id))
         {
         }
 
