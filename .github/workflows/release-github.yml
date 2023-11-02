@@ -11,7 +11,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   PUBLISH_NPM: false
   PUBLISH_NUGET: false
-  PUBLISH_NUGET_GITHUB: true
+  PUBLISH_GITHUB_NUGET: true
   PUBLISH_PYPI: false
 jobs:
   publish_binary:
