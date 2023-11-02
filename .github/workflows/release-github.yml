@@ -1,4 +1,4 @@
-name: release
+name: Release (Github)
 on:
   push:
     branches:
@@ -14,34 +14,40 @@ env:
   PUBLISH_GITHUB_NUGET: true
   PUBLISH_PYPI: false
 jobs:
-  publish_binary:
-    name: publish
+  prerequisites:
+    name: prerequisites
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
     steps:
     - name: Checkout Repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+    - name: Checkout Scripts Repo
+      uses: actions/checkout@v4
+      with:
+        path: ci-scripts
+        repository: jaxxstorm/scripts
+        ref: third_party
     - name: Unshallow clone for tags
       run: git fetch --prune --unshallow --tags
     - name: Install Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v4
       with:
         go-version: ${{matrix.goversion}}
+        cache-dependency-path: provider/go.sum
     - name: Install pulumictl
-      uses: jaxxstorm/action-install-gh-release@v1.5.0
+      uses: jaxxstorm/action-install-gh-release@v1.10.0
       with:
         repo: pulumi/pulumictl
-    - name: Run GoReleaser
-      uses: goreleaser/goreleaser-action@v2
+    - name: Install Pulumi CLI
+      uses: pulumi/actions@v4
+    - if: github.event_name == 'pull_request'
+      name: Install Schema Tools
+      uses: jaxxstorm/action-install-gh-release@v1.10.0
       with:
-        args: release --clean --timeout 60m0s
-        version: latest
-    - name: Build provider binaries
+        repo: mikhailshilkov/schema-tools
+    - name: Build tfgen & provider binaries
       run: make provider
     - name: Tar provider binaries
-      run: tar -zcf ${{ github.workspace }}/bin/provider.tar.gz -C ${{ github.workspace }}/bin/ pulumi-resource-${{ env.PROVIDER }}
+      run: tar -zcf ${{ github.workspace }}/bin/provider.tar.gz -C ${{ github.workspace }}/bin/ pulumi-resource-${{ env.PROVIDER }} pulumi-tfgen-${{ env.PROVIDER }}
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
@@ -52,108 +58,217 @@ jobs:
       matrix:
         goversion:
         - 1.21.x
-  publish_sdk:
-    name: Publish SDKs
+
+  build_sdk:
+    name: build_sdk
+    needs: prerequisites
     runs-on: ubuntu-latest
-    needs: publish_binary
-    permissions:
-      packages: write
-      contents: read
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-      - name: Unshallow clone for tags
-        run: git fetch --prune --unshallow --tags
-      - name: Install Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ matrix.goversion }}
-      - name: Install pulumictl
-        uses: jaxxstorm/action-install-gh-release@v1.5.0
-        with:
-          repo: pulumi/pulumictl
-      - name: Install Pulumi CLI
-        uses: pulumi/action-install-pulumi-cli@v2.0.0
-      - name: Setup Node
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{matrix.nodeversion}}
-          registry-url: ${{env.NPM_REGISTRY_URL}}
-      - name: Setup DotNet
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: ${{matrix.dotnetversion}}
-      - name: Setup Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{matrix.pythonversion}}
-      - name: Download provider binaries
-        uses: actions/download-artifact@v3
-        with:
-          name: ${{ env.PROVIDER }}-provider.tar.gz
-          path: ${{ github.workspace }}/bin
-      - name: Untar provider binaries
-        run: |-
-          tar -zxf ${{ github.workspace }}/bin/provider.tar.gz -C ${{ github.workspace}}/bin
-          find ${{ github.workspace }} -name "pulumi-*-${{ env.PROVIDER }}" -print -exec chmod +x {} \;
-      - name: Update path
-        run: echo "${{ github.workspace }}/bin" >> $GITHUB_PATH
-      - name: Generate SDK
-        run: make ${{ matrix.language }}_sdk
-      - name: Check worktree clean
-        run: |
-          git update-index -q --refresh
-          if ! git diff-files --quiet; then
-              >&2 echo "error: working tree is not clean, aborting!"
-              git status
-              git diff
-              exit 1
-          fi
-      - name: Compress SDK folder
-        run: tar -zcf sdk/${{ matrix.language }}.tar.gz -C sdk/${{ matrix.language }} .
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.language  }}-sdk.tar.gz
-          path: ${{ github.workspace}}/sdk/${{ matrix.language }}.tar.gz
-      - if: ${{ matrix.language == 'python' && env.PUBLISH_PYPI == 'true' }}
-        name: Publish package to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: ${{ env.PYPI_USERNAME }}
-          password: ${{ env.PYPI_PASSWORD }}
-          packages-dir: ${{github.workspace}}/sdk/python/bin/dist
-      - if: ${{ matrix.language == 'nodejs' && env.PUBLISH_NPM == 'true' }}
-        uses: JS-DevTools/npm-publish@v1
-        with:
-          access: "public"
-          token: ${{ env.NPM_TOKEN }}
-          package: ${{github.workspace}}/sdk/nodejs/bin/package.json
-      - if: ${{ matrix.language == 'dotnet' && env.PUBLISH_NUGET == 'true' }}
-        name: publish nuget package
-        run: |
-          dotnet nuget add source --username martinjt --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/martinjt/index.json"
-          dotnet nuget push ${{github.workspace}}/sdk/dotnet/bin/Debug/*.nupkg -s ${{ env.NUGET_FEED_URL }} -k ${{ env.NUGET_PUBLISH_KEY }}
-          echo "done publishing packages"
-      - if: ${{ matrix.language == 'dotnet' && env.PUBLISH_GITHUB_NUGET == 'true' }}
-        name: publish nuget package (Github)
-        run: |
-          dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/martinjt/index.json"
-          dotnet nuget push ${{github.workspace}}/sdk/dotnet/bin/Debug/*.nupkg -s "https://nuget.pkg.github.com/martinjt/index.json" -k ${{ secrets.GITHUB_TOKEN }}
-          echo "done publishing packages"
+    - name: Checkout Repo
+      uses: actions/checkout@v4
+    - name: Checkout Scripts Repo
+      uses: actions/checkout@v4
+      with:
+        path: ci-scripts
+        repository: jaxxstorm/scripts
+        ref: third_party
+    - name: Unshallow clone for tags
+      run: git fetch --prune --unshallow --tags
+    - name: Install Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{matrix.goversion}}
+        cache-dependency-path: provider/go.sum
+    - name: Install pulumictl
+      uses: jaxxstorm/action-install-gh-release@v1.10.0
+      with:
+        repo: pulumi/pulumictl
+    - name: Install Pulumi CLI
+      uses: pulumi/actions@v4
+    # - name: Setup Node
+    #   uses: actions/setup-node@v4
+    #   with:
+    #     node-version: ${{matrix.nodeversion}}
+    #     registry-url: https://registry.npmjs.org
+    - name: Setup DotNet
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{matrix.dotnetversion}}
+    # - name: Setup Python
+    #   uses: actions/setup-python@v4
+    #   with:
+    #     python-version: ${{matrix.pythonversion}}
+    - name: Download provider + tfgen binaries
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ env.PROVIDER }}-provider.tar.gz
+        path: ${{ github.workspace }}/bin
+    - name: Untar provider binaries
+      run: |-
+        tar -zxf ${{ github.workspace }}/bin/provider.tar.gz -C ${{ github.workspace}}/bin
+        find ${{ github.workspace }} -name "pulumi-*-${{ env.PROVIDER }}" -print -exec chmod +x {} \;
+    - name: Update path
+      run: echo "${{ github.workspace }}/bin" >> $GITHUB_PATH
+    - name: Build SDK
+      run: make build_${{ matrix.language }}
+    - name: Check worktree clean
+      run: ./ci-scripts/ci/check-worktree-is-clean
+    - name: Compress SDK folder
+      run: tar -zcf sdk/${{ matrix.language }}.tar.gz -C sdk/${{ matrix.language }} .
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.language  }}.tar.gz
+        path: ${{ github.workspace}}/sdk/${{ matrix.language }}.tar.gz
     strategy:
       fail-fast: true
       matrix:
         dotnetversion:
-          - 6.0.x
+        - 6.0.302
         goversion:
-          - 1.21.x
+        - 1.21.x
         language:
-          ## - nodejs
-          ## - python
-          - dotnet
-          ## - go
+        - nodejs
+        - python
+        - dotnet
+        - go
+        # nodeversion:
+        # - 20.x
+        # pythonversion:
+        # - "3.7"
+
+  publish:
+    name: publish
+    needs: build_sdk
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v4
+    - name: Unshallow clone for tags
+      run: git fetch --prune --unshallow --tags
+    - name: Install Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{matrix.goversion}}
+        cache-dependency-path: provider/go.sum
+    - name: Install pulumictl
+      uses: jaxxstorm/action-install-gh-release@v1.10.0
+      with:
+        repo: pulumi/pulumictl
+    - name: Install Pulumi CLI
+      uses: pulumi/actions@v4
+    - name: Set Release Version
+      run: echo "GORELEASER_CURRENT_TAG=v$(pulumictl get version --language generic)" >> $GITHUB_ENV
+    - name: Run GoReleaser
+      uses: goreleaser/goreleaser-action@v5
+      with:
+        args: release --clean --timeout 60m0s
+        version: latest
+    strategy:
+      fail-fast: true
+      matrix:
+        goversion:
+        - 1.21.x      
+
+  publish_sdk:
+    name: publish_sdk
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v4
+    - name: Checkout Scripts Repo
+      uses: actions/checkout@v4
+      with:
+        path: ci-scripts
+        repository: jaxxstorm/scripts
+        ref: third_party
+    - name: Unshallow clone for tags
+      run: git fetch --prune --unshallow --tags
+    - name: Install Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{matrix.goversion}}
+        cache-dependency-path: provider/go.sum
+    - name: Install pulumictl
+      uses: jaxxstorm/action-install-gh-release@v1.10.0
+      with:
+        repo: pulumi/pulumictl
+    - name: Install Pulumi CLI
+      uses: pulumi/actions@v4
+    # - name: Setup Node
+    #   uses: actions/setup-node@v4
+    #   with:
+    #     node-version: ${{matrix.nodeversion}}
+    #     registry-url: https://registry.npmjs.org
+    # - name: Download nodejs SDK
+    #   uses: actions/download-artifact@v3
+    #   with:
+    #     name: nodejs.tar.gz
+    #     path: ${{ github.workspace}}/sdk/
+    # - name: Create nodejs directory
+    #   run: mkdir -p ${{github.workspace}}/sdk/nodejs
+    # - name: Uncompress nodejs SDK
+    #   run: tar -zxf ${{github.workspace}}/sdk/nodejs.tar.gz -C ${{github.workspace}}/sdk/nodejs
+    # # - name: Publish NPM package
+    # #   run: cd ${{github.workspace}}/sdk/nodejs/bin/ && npm publish --access public
+    # #   env: 
+    # #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    # - name: Publish NPM package
+    #   uses: JS-DevTools/npm-publish@v2
+    #   with: 
+    #     access: "public"
+    #     token: ${{ secrets.NPM_TOKEN }}
+    #     package: ${{github.workspace}}/sdk/nodejs/bin/package.json
+    - name: Setup DotNet
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{matrix.dotnetversion}}
+    - name: Download dotnet SDK
+      uses: actions/download-artifact@v3
+      with:
+        name: dotnet.tar.gz
+        path: ${{ github.workspace}}/sdk/
+    - name: Create dotnet directory
+      run: mkdir -p ${{github.workspace}}/sdk/dotnet
+    - name: Uncompress dotnet SDK
+      run: tar -zxf ${{github.workspace}}/sdk/dotnet.tar.gz -C ${{github.workspace}}/sdk/dotnet
+    - name: publish nuget package (Github)
+      run: |
+        dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/martinjt/index.json"
+        dotnet nuget push ${{github.workspace}}/sdk/dotnet/bin/Debug/*.nupkg -s "https://nuget.pkg.github.com/martinjt/index.json" -k ${{ secrets.GITHUB_TOKEN }}
+        echo "done publishing packages"
+    # - name: Setup Python
+    #   uses: actions/setup-python@v4
+    #   with:
+    #     python-version: ${{matrix.pythonversion}}
+    # - name: Download python SDK
+    #   uses: actions/download-artifact@v3
+    #   with:
+    #     name: python.tar.gz
+    #     path: ${{ github.workspace}}/sdk/
+    # - name: Create python directory
+    #   run: mkdir -p ${{github.workspace}}/sdk/python
+    # - name: Uncompress python SDK
+    #   run: tar -zxf ${{github.workspace}}/sdk/python.tar.gz -C ${{github.workspace}}/sdk/python
+    # - name: Publish PyPI
+    #   uses: pypa/gh-action-pypi-publish@release/v1
+    #   with:
+    #     user: ${{ env.PYPI_USERNAME }}
+    #     password: ${{ env.PYPI_PASSWORD }}
+    #     packages_dir: ${{github.workspace}}/sdk/python/bin/dist
+    strategy:
+      fail-fast: true
+      matrix:
+        dotnetversion:
+        - 6.0.302
+        goversion:
+        - 1.21.x
         nodeversion:
-          - 14.x
+        - 18.x
         pythonversion:
-          - "3.9"
+        - "3.7"
+      
