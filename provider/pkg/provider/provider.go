@@ -18,6 +18,7 @@ func NewProvider() p.Provider {
 				"category/observability",
 				"kind/native",
 			},
+			PluginDownloadURL: "github://api.github.com/martinjt/honeycomb-pulumi-provider",
 		},
 		ModuleMap: map[tokens.ModuleName]tokens.ModuleName{
 			"provider": "Resources",
