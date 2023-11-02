@@ -125,13 +125,13 @@ jobs:
       matrix:
         dotnetversion:
         - 6.0.302
-        goversion:
-        - 1.21.x
+        # goversion:
+        # - 1.21.x
         language:
-        - nodejs
-        - python
+        #- nodejs
+        #- python
         - dotnet
-        - go
+        #- go
         # nodeversion:
         # - 20.x
         # pythonversion:
@@ -265,10 +265,10 @@ jobs:
       matrix:
         dotnetversion:
         - 6.0.302
-        goversion:
-        - 1.21.x
-        nodeversion:
-        - 18.x
-        pythonversion:
-        - "3.7"
+        # goversion:
+        # - 1.21.x
+        # nodeversion:
+        # - 18.x
+        # pythonversion:
+        # - "3.7"
       
