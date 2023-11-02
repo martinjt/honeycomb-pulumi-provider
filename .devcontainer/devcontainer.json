@@ -10,13 +10,14 @@
 		},
 		"ghcr.io/devcontainers/features/go:1": {
 			"version": "1.21"
-		}
+		},
+		"ghcr.io/devcontainers/features/node:1": {}
 	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postStartCommand": "minikube start"
-	"onCreateCommand": "bash .devcontainer/post-create.sh",
+	"onCreateCommand": "bash .devcontainer/on-create.sh",
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
