@@ -161,7 +161,7 @@ jobs:
     - name: Install Pulumi CLI
       uses: pulumi/actions@v4
     - name: Set Release Version
-      run: echo "GORELEASER_CURRENT_TAG=v$(pulumictl get version --language generic)" >> $GITHUB_ENV
+      run: echo "GORELEASER_CURRENT_TAG=v$(pulumictl get version --language generic --is-prerelease)" >> $GITHUB_ENV
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v5
       with:
