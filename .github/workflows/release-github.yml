@@ -167,6 +167,8 @@ jobs:
       with:
         args: release --clean --timeout 60m0s
         version: latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       fail-fast: true
       matrix:
