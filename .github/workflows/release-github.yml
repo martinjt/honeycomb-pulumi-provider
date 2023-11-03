@@ -245,7 +245,7 @@ jobs:
     - name: publish nuget package (Github)
       run: |
         dotnet nuget add source --username martinjt --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/martinjt/index.json"
-        dotnet nuget push ${{github.workspace}}/sdk/dotnet/bin/Debug/*.nupkg -s "https://nuget.pkg.github.com/martinjt/index.json" -k ${{ secrets.GITHUB_TOKEN }}
+        dotnet nuget push ${{github.workspace}}/sdk/dotnet/bin/Debug/*.nupkg -s "https://nuget.pkg.github.com/martinjt/index.json" -k "${{ secrets.GITHUB_TOKEN }}"
         echo "done publishing packages"
     # - name: Setup Python
     #   uses: actions/setup-python@v4
